@@ -30,179 +30,245 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
   } ]);
   "use strict";
   angular.module("gdi2290.md5-service", []).factory("md5", [ function() {
-    var md5 = {
-      createHash: function(str) {
-        if (null === str) {
-          return null;
-        }
-        var xl;
-        var rotateLeft = function(lValue, iShiftBits) {
-          return lValue << iShiftBits | lValue >>> 32 - iShiftBits;
-        };
-        var addUnsigned = function(lX, lY) {
-          var lX4, lY4, lX8, lY8, lResult;
-          lX8 = lX & 2147483648;
-          lY8 = lY & 2147483648;
-          lX4 = lX & 1073741824;
-          lY4 = lY & 1073741824;
-          lResult = (lX & 1073741823) + (lY & 1073741823);
-          if (lX4 & lY4) {
-            return lResult ^ 2147483648 ^ lX8 ^ lY8;
-          }
-          if (lX4 | lY4) {
-            if (lResult & 1073741824) {
-              return lResult ^ 3221225472 ^ lX8 ^ lY8;
-            } else {
-              return lResult ^ 1073741824 ^ lX8 ^ lY8;
-            }
-          } else {
-            return lResult ^ lX8 ^ lY8;
-          }
-        };
-        var _F = function(x, y, z) {
-          return x & y | ~x & z;
-        };
-        var _G = function(x, y, z) {
-          return x & z | y & ~z;
-        };
-        var _H = function(x, y, z) {
-          return x ^ y ^ z;
-        };
-        var _I = function(x, y, z) {
-          return y ^ (x | ~z);
-        };
-        var _FF = function(a, b, c, d, x, s, ac) {
-          a = addUnsigned(a, addUnsigned(addUnsigned(_F(b, c, d), x), ac));
-          return addUnsigned(rotateLeft(a, s), b);
-        };
-        var _GG = function(a, b, c, d, x, s, ac) {
-          a = addUnsigned(a, addUnsigned(addUnsigned(_G(b, c, d), x), ac));
-          return addUnsigned(rotateLeft(a, s), b);
-        };
-        var _HH = function(a, b, c, d, x, s, ac) {
-          a = addUnsigned(a, addUnsigned(addUnsigned(_H(b, c, d), x), ac));
-          return addUnsigned(rotateLeft(a, s), b);
-        };
-        var _II = function(a, b, c, d, x, s, ac) {
-          a = addUnsigned(a, addUnsigned(addUnsigned(_I(b, c, d), x), ac));
-          return addUnsigned(rotateLeft(a, s), b);
-        };
-        var convertToWordArray = function(str) {
-          var lWordCount;
-          var lMessageLength = str.length;
-          var lNumberOfWords_temp1 = lMessageLength + 8;
-          var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - lNumberOfWords_temp1 % 64) / 64;
-          var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
-          var lWordArray = new Array(lNumberOfWords - 1);
-          var lBytePosition = 0;
-          var lByteCount = 0;
-          while (lByteCount < lMessageLength) {
-            lWordCount = (lByteCount - lByteCount % 4) / 4;
-            lBytePosition = lByteCount % 4 * 8;
-            lWordArray[lWordCount] = lWordArray[lWordCount] | str.charCodeAt(lByteCount) << lBytePosition;
-            lByteCount++;
-          }
-          lWordCount = (lByteCount - lByteCount % 4) / 4;
-          lBytePosition = lByteCount % 4 * 8;
-          lWordArray[lWordCount] = lWordArray[lWordCount] | 128 << lBytePosition;
-          lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
-          lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-          return lWordArray;
-        };
-        var wordToHex = function(lValue) {
-          var wordToHexValue = "", wordToHexValue_temp = "", lByte, lCount;
-          for (lCount = 0; lCount <= 3; lCount++) {
-            lByte = lValue >>> lCount * 8 & 255;
-            wordToHexValue_temp = "0" + lByte.toString(16);
-            wordToHexValue = wordToHexValue + wordToHexValue_temp.substr(wordToHexValue_temp.length - 2, 2);
-          }
-          return wordToHexValue;
-        };
-        var x = [], k, AA, BB, CC, DD, a, b, c, d, S11 = 7, S12 = 12, S13 = 17, S14 = 22, S21 = 5, S22 = 9, S23 = 14, S24 = 20, S31 = 4, S32 = 11, S33 = 16, S34 = 23, S41 = 6, S42 = 10, S43 = 15, S44 = 21;
-        x = convertToWordArray(str);
-        a = 1732584193;
-        b = 4023233417;
-        c = 2562383102;
-        d = 271733878;
-        xl = x.length;
-        for (k = 0; k < xl; k += 16) {
-          AA = a;
-          BB = b;
-          CC = c;
-          DD = d;
-          a = _FF(a, b, c, d, x[k + 0], S11, 3614090360);
-          d = _FF(d, a, b, c, x[k + 1], S12, 3905402710);
-          c = _FF(c, d, a, b, x[k + 2], S13, 606105819);
-          b = _FF(b, c, d, a, x[k + 3], S14, 3250441966);
-          a = _FF(a, b, c, d, x[k + 4], S11, 4118548399);
-          d = _FF(d, a, b, c, x[k + 5], S12, 1200080426);
-          c = _FF(c, d, a, b, x[k + 6], S13, 2821735955);
-          b = _FF(b, c, d, a, x[k + 7], S14, 4249261313);
-          a = _FF(a, b, c, d, x[k + 8], S11, 1770035416);
-          d = _FF(d, a, b, c, x[k + 9], S12, 2336552879);
-          c = _FF(c, d, a, b, x[k + 10], S13, 4294925233);
-          b = _FF(b, c, d, a, x[k + 11], S14, 2304563134);
-          a = _FF(a, b, c, d, x[k + 12], S11, 1804603682);
-          d = _FF(d, a, b, c, x[k + 13], S12, 4254626195);
-          c = _FF(c, d, a, b, x[k + 14], S13, 2792965006);
-          b = _FF(b, c, d, a, x[k + 15], S14, 1236535329);
-          a = _GG(a, b, c, d, x[k + 1], S21, 4129170786);
-          d = _GG(d, a, b, c, x[k + 6], S22, 3225465664);
-          c = _GG(c, d, a, b, x[k + 11], S23, 643717713);
-          b = _GG(b, c, d, a, x[k + 0], S24, 3921069994);
-          a = _GG(a, b, c, d, x[k + 5], S21, 3593408605);
-          d = _GG(d, a, b, c, x[k + 10], S22, 38016083);
-          c = _GG(c, d, a, b, x[k + 15], S23, 3634488961);
-          b = _GG(b, c, d, a, x[k + 4], S24, 3889429448);
-          a = _GG(a, b, c, d, x[k + 9], S21, 568446438);
-          d = _GG(d, a, b, c, x[k + 14], S22, 3275163606);
-          c = _GG(c, d, a, b, x[k + 3], S23, 4107603335);
-          b = _GG(b, c, d, a, x[k + 8], S24, 1163531501);
-          a = _GG(a, b, c, d, x[k + 13], S21, 2850285829);
-          d = _GG(d, a, b, c, x[k + 2], S22, 4243563512);
-          c = _GG(c, d, a, b, x[k + 7], S23, 1735328473);
-          b = _GG(b, c, d, a, x[k + 12], S24, 2368359562);
-          a = _HH(a, b, c, d, x[k + 5], S31, 4294588738);
-          d = _HH(d, a, b, c, x[k + 8], S32, 2272392833);
-          c = _HH(c, d, a, b, x[k + 11], S33, 1839030562);
-          b = _HH(b, c, d, a, x[k + 14], S34, 4259657740);
-          a = _HH(a, b, c, d, x[k + 1], S31, 2763975236);
-          d = _HH(d, a, b, c, x[k + 4], S32, 1272893353);
-          c = _HH(c, d, a, b, x[k + 7], S33, 4139469664);
-          b = _HH(b, c, d, a, x[k + 10], S34, 3200236656);
-          a = _HH(a, b, c, d, x[k + 13], S31, 681279174);
-          d = _HH(d, a, b, c, x[k + 0], S32, 3936430074);
-          c = _HH(c, d, a, b, x[k + 3], S33, 3572445317);
-          b = _HH(b, c, d, a, x[k + 6], S34, 76029189);
-          a = _HH(a, b, c, d, x[k + 9], S31, 3654602809);
-          d = _HH(d, a, b, c, x[k + 12], S32, 3873151461);
-          c = _HH(c, d, a, b, x[k + 15], S33, 530742520);
-          b = _HH(b, c, d, a, x[k + 2], S34, 3299628645);
-          a = _II(a, b, c, d, x[k + 0], S41, 4096336452);
-          d = _II(d, a, b, c, x[k + 7], S42, 1126891415);
-          c = _II(c, d, a, b, x[k + 14], S43, 2878612391);
-          b = _II(b, c, d, a, x[k + 5], S44, 4237533241);
-          a = _II(a, b, c, d, x[k + 12], S41, 1700485571);
-          d = _II(d, a, b, c, x[k + 3], S42, 2399980690);
-          c = _II(c, d, a, b, x[k + 10], S43, 4293915773);
-          b = _II(b, c, d, a, x[k + 1], S44, 2240044497);
-          a = _II(a, b, c, d, x[k + 8], S41, 1873313359);
-          d = _II(d, a, b, c, x[k + 15], S42, 4264355552);
-          c = _II(c, d, a, b, x[k + 6], S43, 2734768916);
-          b = _II(b, c, d, a, x[k + 13], S44, 1309151649);
-          a = _II(a, b, c, d, x[k + 4], S41, 4149444226);
-          d = _II(d, a, b, c, x[k + 11], S42, 3174756917);
-          c = _II(c, d, a, b, x[k + 2], S43, 718787259);
-          b = _II(b, c, d, a, x[k + 9], S44, 3951481745);
-          a = addUnsigned(a, AA);
-          b = addUnsigned(b, BB);
-          c = addUnsigned(c, CC);
-          d = addUnsigned(d, DD);
-        }
-        var temp = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
-        return temp.toLowerCase();
+     /*
+     * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+     * to work around bugs in some JS interpreters.
+     */
+      function safeAdd (x, y) {
+          var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+          var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+          return (msw << 16) | (lsw & 0xFFFF)
       }
-    };
+
+     /*
+     * Bitwise rotate a 32-bit number to the left.
+     */
+      function bitRotateLeft (num, cnt) {
+          return (num << cnt) | (num >>> (32 - cnt));
+      }
+
+     /*
+     * These functions implement the four basic operations the algorithm uses.
+     */
+      function md5cmn (q, a, b, x, s, t) {
+          return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
+      }
+      function md5ff (a, b, c, d, x, s, t) {
+          return md5cmn((b & c) | ((~b) & d), a, b, x, s, t);
+      }
+      function md5gg (a, b, c, d, x, s, t) {
+          return md5cmn((b & d) | (c & (~d)), a, b, x, s, t);
+      }
+      function md5hh (a, b, c, d, x, s, t) {
+          return md5cmn(b ^ c ^ d, a, b, x, s, t);
+      }
+      function md5ii (a, b, c, d, x, s, t) {
+          return md5cmn(c ^ (b | (~d)), a, b, x, s, t);
+      }
+
+    /*
+     * Calculate the MD5 of an array of little-endian words, and a bit length.
+     */
+      function binlMD5 (x, len) {
+        /* append padding */
+          x[len >> 5] |= 0x80 << (len % 32);
+          x[(((len + 64) >>> 9) << 4) + 14] = len;
+
+          var i,olda,oldb,oldc,oldd,a=1732584193,b=-271733879,c=-1732584194,d = 271733878;
+
+          for (i = 0; i < x.length; i += 16) {
+              olda = a;
+              oldb = b;
+              oldc = c;
+              oldd = d;
+
+              a = md5ff(a, b, c, d, x[i], 7, -680876936);
+              d = md5ff(d, a, b, c, x[i + 1], 12, -389564586);
+              c = md5ff(c, d, a, b, x[i + 2], 17, 606105819);
+              b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
+              a = md5ff(a, b, c, d, x[i + 4], 7, -176418897);
+              d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426);
+              c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341);
+              b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
+              a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416);
+              d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417);
+              c = md5ff(c, d, a, b, x[i + 10], 17, -42063);
+              b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
+              a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682);
+              d = md5ff(d, a, b, c, x[i + 13], 12, -40341101);
+              c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290);
+              b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
+
+              a = md5gg(a, b, c, d, x[i + 1], 5, -165796510);
+              d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632);
+              c = md5gg(c, d, a, b, x[i + 11], 14, 643717713);
+              b = md5gg(b, c, d, a, x[i], 20, -373897302);
+              a = md5gg(a, b, c, d, x[i + 5], 5, -701558691);
+              d = md5gg(d, a, b, c, x[i + 10], 9, 38016083);
+              c = md5gg(c, d, a, b, x[i + 15], 14, -660478335);
+              b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
+              a = md5gg(a, b, c, d, x[i + 9], 5, 568446438);
+              d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690);
+              c = md5gg(c, d, a, b, x[i + 3], 14, -187363961);
+              b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
+              a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467);
+              d = md5gg(d, a, b, c, x[i + 2], 9, -51403784);
+              c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473);
+              b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
+
+              a = md5hh(a, b, c, d, x[i + 5], 4, -378558);
+              d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463);
+              c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562);
+              b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
+              a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060);
+              d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353);
+              c = md5hh(c, d, a, b, x[i + 7], 16, -155497632);
+              b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
+              a = md5hh(a, b, c, d, x[i + 13], 4, 681279174);
+              d = md5hh(d, a, b, c, x[i], 11, -358537222);
+              c = md5hh(c, d, a, b, x[i + 3], 16, -722521979);
+              b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
+              a = md5hh(a, b, c, d, x[i + 9], 4, -640364487);
+              d = md5hh(d, a, b, c, x[i + 12], 11, -421815835);
+              c = md5hh(c, d, a, b, x[i + 15], 16, 530742520);
+              b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
+
+              a = md5ii(a, b, c, d, x[i], 6, -198630844);
+              d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415);
+              c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905);
+              b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
+              a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571);
+              d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606);
+              c = md5ii(c, d, a, b, x[i + 10], 15, -1051523);
+              b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
+              a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359);
+              d = md5ii(d, a, b, c, x[i + 15], 10, -30611744);
+              c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380);
+              b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
+              a = md5ii(a, b, c, d, x[i + 4], 6, -145523070);
+              d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379);
+              c = md5ii(c, d, a, b, x[i + 2], 15, 718787259);
+              b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
+
+              a = safeAdd(a, olda);
+              b = safeAdd(b, oldb);
+              c = safeAdd(c, oldc);
+              d = safeAdd(d, oldd)
+          }
+          return [a, b, c, d]
+      }
+
+    /*
+     * Convert an array of little-endian words to a string
+     */
+      function binl2rstr (input) {
+          var i,output = '';
+          var length32 = input.length * 32;
+          for (i = 0; i < length32; i += 8) {
+              output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xFF)
+          }
+          return output
+      }
+
+    /*
+     * Convert a raw string to an array of little-endian words
+     * Characters >255 have their high-byte silently ignored.
+     */
+      function rstr2binl (input) {
+          var i,output = [];
+          output[(input.length >> 2) - 1] = undefined;
+          for (i = 0; i < output.length; i += 1) {
+              output[i] = 0
+          }
+          var length8 = input.length * 8;
+          for (i = 0; i < length8; i += 8) {
+              output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (i % 32)
+          }
+          return output
+      }
+
+    /*
+     * Calculate the MD5 of a raw string
+     */
+      function rstrMD5 (s) {
+          return binl2rstr(binlMD5(rstr2binl(s), s.length * 8))
+      }
+
+    /*
+     * Calculate the HMAC-MD5, of a key and some data (raw strings)
+     */
+      function rstrHMACMD5 (key, data) {
+          var i;
+          var bkey = rstr2binl(key);
+          var ipad = [];
+          var opad = [];
+          var hash;
+          ipad[15] = opad[15] = undefined;
+          if (bkey.length > 16) {
+              bkey = binlMD5(bkey, key.length * 8)
+          }
+          for (i = 0; i < 16; i += 1) {
+              ipad[i] = bkey[i] ^ 0x36363636;
+              opad[i] = bkey[i] ^ 0x5C5C5C5C
+          }
+          hash = binlMD5(ipad.concat(rstr2binl(data)), 512 + data.length * 8);
+          return binl2rstr(binlMD5(opad.concat(hash), 512 + 128))
+      }
+
+    /*
+     * Convert a raw string to a hex string
+     */
+      function rstr2hex (input) {
+          var hexTab = '0123456789abcdef';
+          var output = '';
+          var x;
+          var i;
+          for (i = 0; i < input.length; i += 1) {
+              x = input.charCodeAt(i);
+              output += hexTab.charAt((x >>> 4) & 0x0F) +
+                  hexTab.charAt(x & 0x0F)
+          }
+          return output
+      }
+
+    /*
+     * Encode a string as utf-8
+     */
+      function str2rstrUTF8 (input) {
+          return unescape(encodeURIComponent(input))
+      }
+
+    /*
+     * Take string arguments and return either raw or hex encoded strings
+     */
+      function rawMD5 (s) {
+          return rstrMD5(str2rstrUTF8(s))
+      }
+      function hexMD5 (s) {
+          return rstr2hex(rawMD5(s))
+      }
+      function rawHMACMD5 (k, d) {
+          return rstrHMACMD5(str2rstrUTF8(k), str2rstrUTF8(d))
+      }
+      function hexHMACMD5 (k, d) {
+          return rstr2hex(rawHMACMD5(k, d))
+      }
+
+      var md5;
+      md5 = {
+          createHash: function (str, key, raw) {
+              if (!key) {
+                  if (!raw) {
+                      return hexMD5(str);
+                  }
+                  return rawMD5(str);
+              }
+              if (!raw) {
+                  return hexHMACMD5(key, str);
+              }
+              return rawHMACMD5(key, str);
+          }
+      };
     return md5;
   } ]);
 })(angular);

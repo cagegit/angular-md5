@@ -3,22 +3,21 @@
   "version": "0.1.10",
   "main": "angular-md5.js",
   "description": "A md5 crypto component for Angular.js",
-  "homepage": "https://github.com/gdi2290/angular-md5",
-  "bugs": "https://github.com/gdi2290/angular-md5/issues",
-  "author": [
+  "homepage": "https://github.com/cagegit/angular-md5",
+  "bugs": "https://github.com/cagegit/angular-md5/issues",
+  "author":
     {
       "name": "Patrick Stapleton",
-      "email": "github@gdi2290.com",
-      "url": "www.gdi2290.com"
-    }
-  ],
+      "email": "github@gdi2290.com"
+    },
   "contributors": [
     "PatrickJS <github@gdi2290.com",
-    "Benjamin Orozco <benoror@gmail.com>"
+    "Benjamin Orozco <benoror@gmail.com>",
+    "Jetcage <292602005@qq.com>"
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:gdi2290/angular-md5.git"
+    "url": "git@github.com:cagegit/angular-md5.git"
   },
   "keywords": [
     "PatrickJS",
